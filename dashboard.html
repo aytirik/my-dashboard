@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpoFinance — Growth Cockpit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="dashboard">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">O</div>
+      <div class="sidebar-name">Opo<em>Finance</em></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="setNav(this)">
+        <span class="nav-icon">⬡</span> Overview
+      </div>
+      <div class="nav-item" onclick="setNav(this)">
+        <span class="nav-icon">📣</span> Campaigns
+        <span class="nav-badge">4</span>
+      </div>
+      <div class="nav-item" onclick="setNav(this)">
+        <span class="nav-icon">⬇</span> Lead Funnel
+      </div>
+      <div class="nav-section-label">Analytics</div>
+      <div class="nav-item" onclick="setNav(this)">
+        <span class="nav-icon">🌐</span> Regional Pulse
+      </div>
+      <div class="nav-item" onclick="setNav(this)">
+        <span class="nav-icon">📡</span> Social Radar
+      </div>
+      <div class="nav-item" onclick="setNav(this)">
+        <span class="nav-icon">📊</span> Reports
+      </div>
+      <div class="nav-section-label">Settings</div>
+      <div class="nav-item" onclick="setNav(this)">
+        <span class="nav-icon">⚙</span> Settings
+      </div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar">AY</div>
+      <div>
+        <div class="user-info-name">Aytirik</div>
+        <div class="user-info-role">Marketing Lead</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main-wrap">
+    <!-- Header -->
+    <header class="header">
+      <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </div>
+      <div class="header-page-title" id="page-title">Overview</div>
+      <div class="header-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search campaigns, leads…">
+      </div>
+      <div class="header-actions">
+        <div class="date-chip" id="date-chip"></div>
+        <div class="header-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="header-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        </div>
+        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+          <div class="theme-toggle-thumb" id="theme-thumb">
+            <span id="theme-icon">🌙</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content" id="main-content">
+
+      <!-- Row 1: Lead Momentum + Quick Route + Donut -->
+      <div class="grid-row cols-3">
+        <!-- Lead Momentum -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Lead Momentum</span>
+            <div class="card-menu">⋯</div>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:12px;">
+            <div class="momentum-value">2,847</div>
+            <span class="kpi-change up" style="margin-bottom:6px;">↑ 6.1%</span>
+          </div>
+          <div class="momentum-sub">Total leads this week</div>
+          <div class="momentum-bar-wrap">
+            <div class="momentum-bar-label"><span>Organic</span><span>1,240</span></div>
+            <div class="bar-track"><div class="bar-fill cyan" style="width:62%"></div></div>
+          </div>
+          <div class="momentum-bar-wrap" style="margin-top:10px;">
+            <div class="momentum-bar-label"><span>Paid</span><span>1,182</span></div>
+            <div class="bar-track"><div class="bar-fill green" style="width:55%"></div></div>
+          </div>
+          <div class="momentum-bar-wrap" style="margin-top:10px;">
+            <div class="momentum-bar-label"><span>Referral</span><span>425</span></div>
+            <div class="bar-track"><div class="bar-fill purple" style="width:21%"></div></div>
+          </div>
+          <div class="momentum-stats">
+            <div><div class="mstat-value">62%</div><div class="mstat-label">Qualify Rate</div></div>
+            <div><div class="mstat-value">8.4%</div><div class="mstat-label">Convert Rate</div></div>
+            <div><div class="mstat-value">239</div><div class="mstat-label">Deposited</div></div>
+          </div>
+        </div>
+
+        <!-- Quick Route -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Quick Route</span>
+            <div class="card-menu">⋯</div>
+          </div>
+          <div class="qr-grid">
+            <div class="qr-btn">
+              <div class="qr-icon">🚀</div>
+              <div>New Campaign</div>
+            </div>
+            <div class="qr-btn">
+              <div class="qr-icon">📥</div>
+              <div>Import Leads</div>
+            </div>
+            <div class="qr-btn">
+              <div class="qr-icon">🎯</div>
+              <div>A/B Test</div>
+            </div>
+            <div class="qr-btn">
+              <div class="qr-icon">📤</div>
+              <div>Export Report</div>
+            </div>
+            <div class="qr-btn">
+              <div class="qr-icon">🔔</div>
+              <div>Set Alert</div>
+            </div>
+            <div class="qr-btn">
+              <div class="qr-icon">📋</div>
+              <div>Audit Log</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversion Goal -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Conversion Goal</span>
+            <div class="card-menu">⋯</div>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut-svg-wrap">
+              <svg width="130" height="130" viewBox="0 0 130 130" id="donut-svg">
+                <circle cx="65" cy="65" r="52" fill="none" stroke="var(--navy-600)" stroke-width="16"/>
+                <circle cx="65" cy="65" r="52" fill="none" stroke="var(--cyan-400)" stroke-width="16"
+                  stroke-dasharray="326.7" stroke-dashoffset="90" stroke-linecap="round"
+                  transform="rotate(-90 65 65)" style="transition:stroke-dashoffset 1s ease"/>
+                <circle cx="65" cy="65" r="52" fill="none" stroke="var(--blue-500)" stroke-width="16"
+                  stroke-dasharray="326.7" stroke-dashoffset="-237" stroke-linecap="round"
+                  transform="rotate(-90 65 65)" opacity="0.7"/>
+              </svg>
+              <div class="donut-center">
+                <div class="donut-pct">72%</div>
+                <div class="donut-pct-label">of goal</div>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--cyan-400)"></div>
+                <span class="legend-name">Deposited</span>
+                <span class="legend-val">239</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--blue-500)"></div>
+                <span class="legend-name">Demo</span>
+                <span class="legend-val">892</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--navy-600)"></div>
+                <span class="legend-name">Remaining</span>
+                <span class="legend-val">192</span>
+              </div>
+              <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">Target: 332 deposits</div>
+              <div style="font-size:11px;color:var(--text-muted)">Period: Apr 1–30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: 4 KPI Cards -->
+      <div class="grid-row cols-4">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Campaign ROI</span>
+            <div class="kpi-icon" style="background:rgba(0,212,232,0.12);font-size:18px;">📈</div>
+          </div>
+          <div class="kpi-value">312%</div>
+          <div class="kpi-label">Return on ad spend</div>
+          <div class="kpi-change up">↑ 18.4%</div>
+          <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="0,35 15,28 30,20 45,25 60,12 75,8 90,5 100,3" fill="none" stroke="var(--cyan-400)" stroke-width="2"/><polyline points="0,35 15,28 30,20 45,25 60,12 75,8 90,5 100,3 100,40 0,40" fill="rgba(0,212,232,0.08)" stroke="none"/></svg></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Landing CVR</span>
+            <div class="kpi-icon" style="background:rgba(59,130,246,0.12);font-size:18px;">🎯</div>
+          </div>
+          <div class="kpi-value">8.4%</div>
+          <div class="kpi-label">Landing page conv. rate</div>
+          <div class="kpi-change up">↑ 0.9pp</div>
+          <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="0,30 15,26 30,22 45,28 60,18 75,14 90,10 100,8" fill="none" stroke="var(--blue-500)" stroke-width="2"/><polyline points="0,30 15,26 30,22 45,28 60,18 75,14 90,10 100,8 100,40 0,40" fill="rgba(59,130,246,0.08)" stroke="none"/></svg></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Traffic Quality</span>
+            <div class="kpi-icon" style="background:rgba(139,92,246,0.12);font-size:18px;">⚡</div>
+          </div>
+          <div class="kpi-value">84.2</div>
+          <div class="kpi-label">Quality score / 100</div>
+          <div class="kpi-change down">↓ 1.3pt</div>
+          <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="0,12 15,15 30,10 45,8 60,14 75,18 90,22 100,20" fill="none" stroke="var(--purple-500)" stroke-width="2"/><polyline points="0,12 15,15 30,10 45,8 60,14 75,18 90,22 100,20 100,40 0,40" fill="rgba(139,92,246,0.08)" stroke="none"/></svg></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Social Engagement</span>
+            <div class="kpi-icon" style="background:rgba(52,211,153,0.12);font-size:18px;">💬</div>
+          </div>
+          <div class="kpi-value">4.7%</div>
+          <div class="kpi-label">Avg. engagement rate</div>
+          <div class="kpi-change up">↑ 0.4pp</div>
+          <div class="sparkline"><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline points="0,32 15,25 30,28 45,20 60,15 75,10 90,12 100,8" fill="none" stroke="var(--green-400)" stroke-width="2"/><polyline points="0,32 15,25 30,28 45,20 60,15 75,10 90,12 100,8 100,40 0,40" fill="rgba(52,211,153,0.08)" stroke="none"/></svg></div>
+        </div>
+      </div>
+
+      <!-- Row 3: Weekly Bar Chart + Acquisition Mix -->
+      <div class="grid-row cols-3-1">
+        <!-- Weekly Performance -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Weekly Performance</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select style="background:var(--input-bg);border:1px solid var(--border);color:var(--text-secondary);font-size:12px;padding:4px 8px;border-radius:6px;outline:none;">
+                <option>This Month</option><option>Last Month</option><option>Q1 2025</option>
+              </select>
+              <div class="card-menu">⋯</div>
+            </div>
+          </div>
+          <div class="bar-chart" id="bar-chart">
+            <!-- generated by JS -->
+          </div>
+          <div class="chart-legend">
+            <div class="cl-item"><div class="cl-dot" style="background:var(--cyan-400)"></div>Leads</div>
+            <div class="cl-item"><div class="cl-dot" style="background:var(--blue-500)"></div>Qualified</div>
+            <div class="cl-item"><div class="cl-dot" style="background:var(--purple-500)"></div>Converted</div>
+          </div>
+        </div>
+
+        <!-- Acquisition Mix -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Acquisition Mix</span>
+            <div class="card-menu">⋯</div>
+          </div>
+          <div class="acq-list">
+            <div class="acq-item">
+              <div class="acq-icon" style="background:rgba(0,212,232,0.1);">🔍</div>
+              <div style="flex:1;">
+                <div class="acq-name">Organic Search</div>
+                <div class="acq-bar-track"><div class="acq-bar-fill" style="width:62%;background:var(--cyan-400)"></div></div>
+              </div>
+              <div class="acq-pct">44%</div>
+            </div>
+            <div class="acq-item">
+              <div class="acq-icon" style="background:rgba(59,130,246,0.1);">💰</div>
+              <div style="flex:1;">
+                <div class="acq-name">Paid Search</div>
+                <div class="acq-bar-track"><div class="acq-bar-fill" style="width:42%;background:var(--blue-500)"></div></div>
+              </div>
+              <div class="acq-pct">28%</div>
+            </div>
+            <div class="acq-item">
+              <div class="acq-icon" style="background:rgba(139,92,246,0.1);">📱</div>
+              <div style="flex:1;">
+                <div class="acq-name">Social Media</div>
+                <div class="acq-bar-track"><div class="acq-bar-fill" style="width:24%;background:var(--purple-500)"></div></div>
+              </div>
+              <div class="acq-pct">15%</div>
+            </div>
+            <div class="acq-item">
+              <div class="acq-icon" style="background:rgba(251,191,36,0.1);">🤝</div>
+              <div style="flex:1;">
+                <div class="acq-name">Referral</div>
+                <div class="acq-bar-track"><div class="acq-bar-fill" style="width:15%;background:var(--yellow-400)"></div></div>
+              </div>
+              <div class="acq-pct">9%</div>
+            </div>
+            <div class="acq-item">
+              <div class="acq-icon" style="background:rgba(248,113,113,0.1);">📧</div>
+              <div style="flex:1;">
+                <div class="acq-name">Email</div>
+                <div class="acq-bar-track"><div class="acq-bar-fill" style="width:6%;background:var(--red-400)"></div></div>
+              </div>
+              <div class="acq-pct">4%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: Activity Feed + Regional Pulse -->
+      <div class="grid-row cols-3-1">
+        <!-- Recent Campaign Activity -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Campaign Activity</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;color:var(--cyan-400);cursor:pointer;font-weight:600;">View All →</span>
+              <div class="card-menu">⋯</div>
+            </div>
+          </div>
+          <div class="feed-list">
+            <div class="feed-item">
+              <div class="feed-dot-wrap"><div class="feed-dot" style="background:var(--green-400)"></div></div>
+              <div class="feed-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="feed-title">MENA FX Awareness — Meta Ads</div>
+                  <span class="feed-badge badge-live">Live</span>
+                </div>
+                <div class="feed-meta">ROI 340% · 1,240 leads · Budget $12,400 / $18,000</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot-wrap"><div class="feed-dot" style="background:var(--cyan-400)"></div></div>
+              <div class="feed-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="feed-title">EU Retail Trader — Google Search</div>
+                  <span class="feed-badge badge-live">Live</span>
+                </div>
+                <div class="feed-meta">ROI 285% · 892 leads · Budget $9,800 / $15,000</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot-wrap"><div class="feed-dot" style="background:var(--yellow-400)"></div></div>
+              <div class="feed-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="feed-title">SEA Crypto Crossover — TikTok</div>
+                  <span class="feed-badge badge-paused">Paused</span>
+                </div>
+                <div class="feed-meta">ROI 198% · 461 leads · Budget $4,200 / $8,000</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot-wrap"><div class="feed-dot" style="background:var(--text-muted)"></div></div>
+              <div class="feed-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="feed-title">LATAM Onboarding — Email Drip</div>
+                  <span class="feed-badge badge-draft">Draft</span>
+                </div>
+                <div class="feed-meta">Scheduled Apr 14 · Est. 600 leads · Budget $3,500</div>
+              </div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot-wrap"><div class="feed-dot" style="background:var(--red-400)"></div></div>
+              <div class="feed-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="feed-title">Q1 Brand Awareness — Display</div>
+                  <span class="feed-badge badge-ended">Ended</span>
+                </div>
+                <div class="feed-meta">ROI 220% · 3,140 leads · Budget $22,000 spent</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regional Pulse -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Regional Pulse</span>
+            <div class="card-menu">⋯</div>
+          </div>
+          <div class="region-list">
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span class="region-flag">🇦🇪</span>
+                <span class="region-name">UAE <span class="region-change up">↑8%</span></span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:88%;background:var(--cyan-400)"></div></div></div>
+              <div class="region-val">882</div>
+            </div>
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span class="region-flag">🇸🇦</span>
+                <span class="region-name">KSA <span class="region-change up">↑5%</span></span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:72%;background:var(--blue-500)"></div></div></div>
+              <div class="region-val">644</div>
+            </div>
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span class="region-flag">🇩🇪</span>
+                <span class="region-name">DE <span class="region-change down">↓2%</span></span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:55%;background:var(--purple-500)"></div></div></div>
+              <div class="region-val">487</div>
+            </div>
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span class="region-flag">🇸🇬</span>
+                <span class="region-name">SG <span class="region-change up">↑12%</span></span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:42%;background:var(--green-400)"></div></div></div>
+              <div class="region-val">374</div>
+            </div>
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span class="region-flag">🇧🇷</span>
+                <span class="region-name">BR <span class="region-change up">↑3%</span></span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:28%;background:var(--yellow-400)"></div></div></div>
+              <div class="region-val">248</div>
+            </div>
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span class="region-flag">🇬🇧</span>
+                <span class="region-name">UK <span class="region-change down">↓1%</span></span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:22%;background:var(--orange-400)"></div></div></div>
+              <div class="region-val">212</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end main-wrap -->
+</div><!-- end dashboard -->
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
