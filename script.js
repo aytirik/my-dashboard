@@ -1,15 +1,14 @@
-// ===== DATE =====
-(function() {
+// ===== DATE CHIP =====
+(function () {
   const dateChip = document.getElementById('date-chip');
   if (dateChip) {
     const d = new Date();
-    const opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-    dateChip.textContent = d.toLocaleDateString('en-US', opts);
+    dateChip.textContent = d.toLocaleDateString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
   }
 })();
 
-// ===== DASHBOARD INIT (runs only on dashboard.html) =====
-document.addEventListener('DOMContentLoaded', function() {
+// ===== DASHBOARD INIT =====
+document.addEventListener('DOMContentLoaded', function () {
   const content = document.getElementById('main-content');
   if (content) {
     buildBarChart();
@@ -19,33 +18,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== MOBILE SIDEBAR =====
 function toggleSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('visible');
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('visible');
 }
 function closeSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar) sidebar.classList.remove('open');
-  if (overlay) overlay.classList.remove('visible');
+  const s = document.querySelector('.sidebar');
+  const o = document.getElementById('sidebar-overlay');
+  if (s) s.classList.remove('open');
+  if (o) o.classList.remove('visible');
 }
 
-// ===== LOGIN =====
+// ===== AUTH =====
 function doLogin() {
   const btn = event && event.currentTarget;
   if (btn) { btn.textContent = 'Signing in…'; btn.disabled = true; }
   setTimeout(() => { window.location.href = 'dashboard.html'; }, 350);
 }
-
-// ===== SIGN UP =====
 function doSignup() {
   const btn = event && event.currentTarget;
   if (btn) { btn.textContent = 'Creating account…'; btn.disabled = true; }
   setTimeout(() => { window.location.href = 'dashboard.html'; }, 350);
 }
 
-// ===== NAV / ROUTER =====
+// ===== ROUTER =====
 let overviewHTML = '';
 
 const pageRenderers = {
@@ -57,10 +52,11 @@ const pageRenderers = {
   'Reports':        renderReports,
   'Settings':       renderSettings,
 };
+
 function setNav(el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-  const label = el.textContent.trim().replace(/\s*\d+$/, '').trim();
+  const label = el.textContent.trim().replace(/\s*\d+$/, '').trim().replace(/^\S+\s+/, '');
   document.getElementById('page-title').textContent = label;
   const content = document.getElementById('main-content');
   content.style.opacity = '0';
@@ -73,274 +69,503 @@ function setNav(el) {
   closeSidebar();
 }
 
-// ===== PAGE: OVERVIEW =====
+// ===========================
+//  PAGE: OVERVIEW
+// ===========================
 function renderOverview() {
-  document.getElementById('main-content').innerHTML = overviewHTML;
+  const h = new Date().getHours();
+  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const banner = `
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <div class="welcome-greeting">${greeting}, Aytirik 👋</div>
+        <div class="welcome-sub">Here's your marketing performance snapshot. All metrics are live for today.</div>
+      </div>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="welcome-stat-val">2,847</div><div class="welcome-stat-lbl">Leads Today</div></div>
+        <div class="welcome-stat-div"></div>
+        <div class="welcome-stat"><div class="welcome-stat-val">312%</div><div class="welcome-stat-lbl">Blended ROI</div></div>
+        <div class="welcome-stat-div"></div>
+        <div class="welcome-stat"><div class="welcome-stat-val">4 Live</div><div class="welcome-stat-lbl">Campaigns</div></div>
+        <div class="welcome-stat-div"></div>
+        <div class="welcome-stat"><div class="welcome-stat-val">72%</div><div class="welcome-stat-lbl">Goal Progress</div></div>
+      </div>
+    </div>`;
+  document.getElementById('main-content').innerHTML = banner + overviewHTML;
   buildBarChart();
 }
 
-// ===== PAGE: CAMPAIGNS =====
+// ===========================
+//  PAGE: CAMPAIGNS
+// ===========================
 function renderCampaigns() {
+  const campaigns = [
+    { name:'MENA FX Awareness',    dates:'Apr 1 – Apr 30',  channel:'Meta Ads',     status:'live',   leads:1240, budgetUsed:12400, budgetTotal:18000, roi:'340%', ctr:'5.2%', cvr:'9.2%' },
+    { name:'EU Retail Trader',     dates:'Mar 15 – Apr 15', channel:'Google Search',status:'live',   leads:892,  budgetUsed:9800,  budgetTotal:15000, roi:'285%', ctr:'4.8%', cvr:'7.8%' },
+    { name:'GCC VIP Traders',      dates:'Apr 8 – Apr 28',  channel:'LinkedIn',     status:'live',   leads:318,  budgetUsed:6200,  budgetTotal:12000, roi:'415%', ctr:'3.1%', cvr:'11.4%'},
+    { name:'SEA Crypto Crossover', dates:'Apr 5 – Apr 25',  channel:'TikTok',       status:'paused', leads:461,  budgetUsed:4200,  budgetTotal:8000,  roi:'198%', ctr:'6.7%', cvr:'5.4%' },
+    { name:'LATAM Onboarding',     dates:'Starts Apr 14',   channel:'Email Drip',   status:'draft',  leads:null, budgetUsed:0,     budgetTotal:3500,  roi:'—',    ctr:'—',    cvr:'—'    },
+    { name:'Q1 Brand Awareness',   dates:'Jan 1 – Mar 31',  channel:'Display',      status:'ended',  leads:3140, budgetUsed:22000, budgetTotal:22000, roi:'220%', ctr:'2.3%', cvr:'6.1%' },
+    { name:'TR Forex Push',        dates:'Mar 20 – Apr 20', channel:'Google Search',status:'live',   leads:574,  budgetUsed:5800,  budgetTotal:9000,  roi:'298%', ctr:'5.5%', cvr:'8.9%' },
+    { name:'AE Premium Clients',   dates:'Apr 10 – May 10', channel:'LinkedIn',     status:'live',   leads:209,  budgetUsed:3100,  budgetTotal:10000, roi:'380%', ctr:'2.9%', cvr:'12.1%'},
+  ];
+
+  const statusConfig = {
+    live:   { label:'Live',   cls:'status-live' },
+    paused: { label:'Paused', cls:'status-paused' },
+    draft:  { label:'Draft',  cls:'status-draft' },
+    ended:  { label:'Ended',  cls:'status-ended' },
+  };
+  const roiColor = r => r === '—' ? '' : parseInt(r) >= 300 ? 'color:var(--green-400);font-weight:700' : parseInt(r) >= 200 ? 'color:var(--yellow-400);font-weight:700' : '';
+  const actionLabel = s => ({ live:'Edit', paused:'Resume', draft:'Launch', ended:'Report' }[s]);
+
+  const totals = { live: campaigns.filter(c=>c.status==='live').length, budget: '$67.7K', roi: '312%', leads: campaigns.reduce((a,c)=>(c.leads||0)+a,0) };
+
   document.getElementById('main-content').innerHTML = `
     <div class="page-hd">
       <div><h2>Campaigns</h2><p>Manage and monitor all active marketing campaigns</p></div>
       <div style="display:flex;gap:10px;">
-        <button class="btn-secondary">⬇ Export</button>
+        <button class="btn-secondary" onclick="showToast('CSV exported successfully')">⬇ Export</button>
         <button class="btn-primary">＋ New Campaign</button>
       </div>
     </div>
     <div class="grid-row cols-4">
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">📣</div><div class="stat-value">12</div><div class="stat-label">Total campaigns</div><div class="stat-chip up">↑ 3 this month</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">✅</div><div class="stat-value">4</div><div class="stat-label">Currently live</div><div class="stat-chip up">↑ 1 vs last week</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">💰</div><div class="stat-value">$67.7K</div><div class="stat-label">Total active budget</div><div class="stat-chip down">↓ $4.2K paused</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">📈</div><div class="stat-value">312%</div><div class="stat-label">Avg. blended ROI</div><div class="stat-chip up">↑ 18.4%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">📣</div><div class="stat-value">${campaigns.length}</div><div class="stat-label">Total campaigns</div><div class="stat-chip up">↑ 3 this month</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">✅</div><div class="stat-value">${totals.live}</div><div class="stat-label">Currently live</div><div class="stat-chip up">↑ 1 vs last week</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">💰</div><div class="stat-value">${totals.budget}</div><div class="stat-label">Total active budget</div><div class="stat-chip down">↓ $4.2K paused</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">📈</div><div class="stat-value">${totals.roi}</div><div class="stat-label">Avg. blended ROI</div><div class="stat-chip up">↑ 18.4%</div></div>
     </div>
     <div class="table-wrap">
       <div class="table-header">
         <div class="table-title">All Campaigns</div>
-        <select class="table-filter"><option>All Channels</option><option>Meta Ads</option><option>Google</option><option>TikTok</option><option>Email</option><option>LinkedIn</option></select>
+        <select class="table-filter"><option>All Channels</option><option>Meta Ads</option><option>Google Search</option><option>TikTok</option><option>Email Drip</option><option>LinkedIn</option><option>Display</option></select>
         <select class="table-filter"><option>All Statuses</option><option>Live</option><option>Paused</option><option>Draft</option><option>Ended</option></select>
       </div>
       <table class="data-table">
-        <thead><tr><th>Campaign</th><th>Channel</th><th>Status</th><th>Leads</th><th>Budget Used</th><th>ROI</th><th>CVR</th><th>Actions</th></tr></thead>
+        <thead><tr>
+          <th>Campaign</th><th>Channel</th><th>Status</th>
+          <th>Leads</th><th>Budget Used</th><th>ROI</th><th>CTR</th><th>CVR</th><th>Action</th>
+        </tr></thead>
         <tbody>
-          <tr>
-            <td><strong>MENA FX Awareness</strong><br><span style="font-size:11px;color:var(--text-muted)">Apr 1 – Apr 30</span></td>
-            <td>Meta Ads</td><td><span class="status-pill status-live"><span class="status-dot"></span>Live</span></td><td>1,240</td>
-            <td><div>$12,400 / $18,000</div><div class="budget-bar-track"><div class="budget-bar-fill" style="width:69%"></div></div></td>
-            <td style="color:var(--green-400);font-weight:700;">340%</td><td>9.2%</td><td><button class="tbl-btn">Edit</button></td>
-          </tr>
-          <tr>
-            <td><strong>EU Retail Trader</strong><br><span style="font-size:11px;color:var(--text-muted)">Mar 15 – Apr 15</span></td>
-            <td>Google Search</td><td><span class="status-pill status-live"><span class="status-dot"></span>Live</span></td><td>892</td>
-            <td><div>$9,800 / $15,000</div><div class="budget-bar-track"><div class="budget-bar-fill" style="width:65%"></div></div></td>
-            <td style="color:var(--green-400);font-weight:700;">285%</td><td>7.8%</td><td><button class="tbl-btn">Edit</button></td>
-          </tr>
-          <tr>
-            <td><strong>GCC VIP Traders</strong><br><span style="font-size:11px;color:var(--text-muted)">Apr 8 – Apr 28</span></td>
-            <td>LinkedIn</td><td><span class="status-pill status-live"><span class="status-dot"></span>Live</span></td><td>318</td>
-            <td><div>$6,200 / $12,000</div><div class="budget-bar-track"><div class="budget-bar-fill" style="width:52%"></div></div></td>
-            <td style="color:var(--green-400);font-weight:700;">415%</td><td>11.4%</td><td><button class="tbl-btn">Edit</button></td>
-          </tr>
-          <tr>
-            <td><strong>SEA Crypto Crossover</strong><br><span style="font-size:11px;color:var(--text-muted)">Apr 5 – Apr 25</span></td>
-            <td>TikTok</td><td><span class="status-pill status-paused"><span class="status-dot"></span>Paused</span></td><td>461</td>
-            <td><div>$4,200 / $8,000</div><div class="budget-bar-track"><div class="budget-bar-fill" style="width:52%"></div></div></td>
-            <td style="color:var(--yellow-400);font-weight:700;">198%</td><td>5.4%</td><td><button class="tbl-btn">Resume</button></td>
-          </tr>
-          <tr>
-            <td><strong>LATAM Onboarding</strong><br><span style="font-size:11px;color:var(--text-muted)">Starts Apr 14</span></td>
-            <td>Email Drip</td><td><span class="status-pill status-draft"><span class="status-dot"></span>Draft</span></td><td>—</td>
-            <td><div>$0 / $3,500</div><div class="budget-bar-track"><div class="budget-bar-fill" style="width:0%"></div></div></td>
-            <td>—</td><td>—</td><td><button class="tbl-btn">Launch</button></td>
-          </tr>
-          <tr>
-            <td><strong>Q1 Brand Awareness</strong><br><span style="font-size:11px;color:var(--text-muted)">Jan 1 – Mar 31</span></td>
-            <td>Display</td><td><span class="status-pill status-ended"><span class="status-dot"></span>Ended</span></td><td>3,140</td>
-            <td><div>$22,000 / $22,000</div><div class="budget-bar-track"><div class="budget-bar-fill" style="width:100%"></div></div></td>
-            <td style="color:var(--green-400);font-weight:700;">220%</td><td>6.1%</td><td><button class="tbl-btn">Report</button></td>
-          </tr>
+          ${campaigns.map(c => {
+            const sc = statusConfig[c.status];
+            const pct = c.budgetTotal > 0 ? Math.round(c.budgetUsed / c.budgetTotal * 100) : 0;
+            return `<tr>
+              <td><strong>${c.name}</strong><br><span style="font-size:11px;color:var(--text-muted)">${c.dates}</span></td>
+              <td style="color:var(--text-secondary)">${c.channel}</td>
+              <td><span class="status-pill ${sc.cls}"><span class="status-dot"></span>${sc.label}</span></td>
+              <td>${c.leads !== null ? c.leads.toLocaleString() : '—'}</td>
+              <td>
+                <div style="font-size:12px">$${c.budgetUsed.toLocaleString()} / $${c.budgetTotal.toLocaleString()}</div>
+                <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${pct}%"></div></div>
+              </td>
+              <td style="${roiColor(c.roi)}">${c.roi}</td>
+              <td>${c.ctr}</td>
+              <td>${c.cvr}</td>
+              <td><button class="tbl-btn">${actionLabel(c.status)}</button></td>
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>
     </div>`;
 }
 
-// ===== PAGE: LEAD FUNNEL =====
+// ===========================
+//  PAGE: LEAD FUNNEL
+// ===========================
 function renderFunnel() {
+  const stages = [
+    { icon:'👁',  name:'Impressions', count:'84,200', subPct:'100% — entry point',      color:'var(--cyan-400)',   rate:null,   rateLabel:null },
+    { icon:'🖱',  name:'Clicks',      count:'4,210',  subPct:'5.0% click-through rate', color:'var(--blue-500)',  rate:'5.0%', rateLabel:'click-through rate' },
+    { icon:'📋',  name:'Leads',       count:'2,847',  subPct:'67.6% of clicks',         color:'var(--purple-500)',rate:'67.6%',rateLabel:'click-to-lead rate' },
+    { icon:'🎯',  name:'Qualified',   count:'1,764',  subPct:'62.0% qualify rate',      color:'var(--yellow-400)',rate:'62.0%',rateLabel:'qualify rate' },
+    { icon:'💰',  name:'Conversions', count:'239',    subPct:'13.5% conversion rate',   color:'var(--green-400)', rate:'13.5%',rateLabel:'FTD conversion rate' },
+  ];
+
+  const dropOffs = [
+    { label:'Impressions → Clicks', lost:'96.6%', color:'var(--red-400)', w:97 },
+    { label:'Clicks → Leads',       lost:'32.4%', color:'var(--yellow-400)', w:32 },
+    { label:'Leads → Qualified',    lost:'38.0%', color:'var(--orange-400)', w:38 },
+    { label:'Qualified → FTD',      lost:'86.5%', color:'var(--purple-500)', w:87 },
+  ];
+
+  const byChannel = [
+    ['Meta Ads',     '44', 88, 'var(--cyan-400)'],
+    ['Google Search','31', 62, 'var(--blue-500)'],
+    ['TikTok',       '15', 30, 'var(--purple-500)'],
+    ['LinkedIn',     '10', 20, 'var(--green-400)'],
+  ];
+
   document.getElementById('main-content').innerHTML = `
     <div class="page-hd">
-      <div><h2>Lead Funnel</h2><p>Track lead progression from impression to deposited client</p></div>
-      <button class="btn-primary">⬇ Export Funnel</button>
+      <div><h2>Lead Funnel</h2><p>Track lead progression from impression to first deposit</p></div>
+      <button class="btn-primary" onclick="showToast('Funnel report exported')">⬇ Export Funnel</button>
     </div>
     <div class="grid-row cols-4">
       <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">👁</div><div class="stat-value">84.2K</div><div class="stat-label">Impressions</div><div class="stat-chip up">↑ 12.4%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">📋</div><div class="stat-value">2,847</div><div class="stat-label">Leads captured</div><div class="stat-chip up">↑ 6.1%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">✅</div><div class="stat-value">1,764</div><div class="stat-label">Qualified leads</div><div class="stat-chip up">↑ 4.8%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">💰</div><div class="stat-value">239</div><div class="stat-label">Deposited (FTD)</div><div class="stat-chip up">↑ 9.2%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">🖱</div><div class="stat-value">4,210</div><div class="stat-label">Clicks</div><div class="stat-chip up">↑ 8.7%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">📋</div><div class="stat-value">2,847</div><div class="stat-label">Leads Captured</div><div class="stat-chip up">↑ 6.1%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">💰</div><div class="stat-value">239</div><div class="stat-label">Conversions (FTD)</div><div class="stat-chip up">↑ 9.2%</div></div>
     </div>
     <div class="funnel-wrap">
       <div class="funnel-col">
-        <div class="funnel-stage">
-          <div class="funnel-fill" style="background:var(--cyan-400);width:100%"></div>
-          <div class="funnel-icon">👁</div>
-          <div class="funnel-info"><div class="funnel-name">Impressions</div><div class="funnel-count">84,200</div><div class="funnel-pct">100% — entry point</div></div>
-        </div>
-        <div class="funnel-arrow"><span>↓</span><span class="funnel-arrow-rate">3.4% click-through rate</span></div>
-        <div class="funnel-stage">
-          <div class="funnel-fill" style="background:var(--blue-500);width:89%"></div>
-          <div class="funnel-icon">📋</div>
-          <div class="funnel-info"><div class="funnel-name">Form Submissions</div><div class="funnel-count">2,847</div><div class="funnel-pct">3.4% of impressions</div></div>
-        </div>
-        <div class="funnel-arrow"><span>↓</span><span class="funnel-arrow-rate">62% qualify rate</span></div>
-        <div class="funnel-stage">
-          <div class="funnel-fill" style="background:var(--purple-500);width:62%"></div>
-          <div class="funnel-icon">🎯</div>
-          <div class="funnel-info"><div class="funnel-name">Qualified Leads</div><div class="funnel-count">1,764</div><div class="funnel-pct">62% of submissions</div></div>
-        </div>
-        <div class="funnel-arrow"><span>↓</span><span class="funnel-arrow-rate">53% demo rate</span></div>
-        <div class="funnel-stage">
-          <div class="funnel-fill" style="background:var(--yellow-400);width:33%"></div>
-          <div class="funnel-icon">🖥</div>
-          <div class="funnel-info"><div class="funnel-name">Demo Account</div><div class="funnel-count">931</div><div class="funnel-pct">53% of qualified</div></div>
-        </div>
-        <div class="funnel-arrow"><span>↓</span><span class="funnel-arrow-rate">25.7% FTD rate</span></div>
-        <div class="funnel-stage" style="border-color:var(--green-400);">
-          <div class="funnel-fill" style="background:var(--green-400);width:14%"></div>
-          <div class="funnel-icon">💰</div>
-          <div class="funnel-info"><div class="funnel-name">First Deposit (FTD)</div><div class="funnel-count">239</div><div class="funnel-pct">25.7% of demo users</div></div>
-        </div>
+        ${stages.map((s, i) => `
+          ${i > 0 ? `<div class="funnel-arrow"><span>↓</span><span class="funnel-arrow-rate">${s.rate} ${s.rateLabel}</span></div>` : ''}
+          <div class="funnel-stage" style="border-color:${s.color}20">
+            <div class="funnel-fill" style="background:${s.color};width:${100 - i*17}%"></div>
+            <div class="funnel-icon">${s.icon}</div>
+            <div class="funnel-info">
+              <div class="funnel-name">${s.name}</div>
+              <div class="funnel-count">${s.count}</div>
+              <div class="funnel-pct">${s.subPct}</div>
+            </div>
+            <div style="font:800 20px/1 system-ui;color:${s.color};position:relative;z-index:1;">${Math.round(100 - i*17)}%</div>
+          </div>`).join('')}
       </div>
       <div class="funnel-side">
         <div class="card">
           <div class="card-header"><span class="card-title">Top Drop-off Points</span></div>
           <div class="acq-list">
-            <div class="acq-item">
-              <div class="acq-icon" style="background:rgba(248,113,113,.1);">⚠</div>
-              <div style="flex:1;"><div class="acq-name">Impressions → Leads</div><div class="acq-bar-track"><div class="acq-bar-fill" style="width:97%;background:var(--red-400)"></div></div></div>
-              <div class="acq-pct" style="color:var(--red-400);">96.6%</div>
-            </div>
-            <div class="acq-item">
-              <div class="acq-icon" style="background:rgba(251,191,36,.1);">📊</div>
-              <div style="flex:1;"><div class="acq-name">Qualified → Demo</div><div class="acq-bar-track"><div class="acq-bar-fill" style="width:47%;background:var(--yellow-400)"></div></div></div>
-              <div class="acq-pct" style="color:var(--yellow-400);">47%</div>
-            </div>
-            <div class="acq-item">
-              <div class="acq-icon" style="background:rgba(0,212,232,.1);">💰</div>
-              <div style="flex:1;"><div class="acq-name">Demo → Deposit</div><div class="acq-bar-track"><div class="acq-bar-fill" style="width:74%;background:var(--cyan-400)"></div></div></div>
-              <div class="acq-pct">74% pass</div>
-            </div>
+            ${dropOffs.map(d => `
+              <div class="acq-item">
+                <div class="acq-icon" style="background:${d.color}18;">⚠</div>
+                <div style="flex:1;">
+                  <div class="acq-name">${d.label}</div>
+                  <div class="acq-bar-track"><div class="acq-bar-fill" style="width:${d.w}%;background:${d.color}"></div></div>
+                </div>
+                <div class="acq-pct" style="color:${d.color}">${d.lost}</div>
+              </div>`).join('')}
           </div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Funnel by Channel</span></div>
           <div class="region-list">
-            ${[['Meta Ads','44',88,'var(--cyan-400)'],['Google Search','31',62,'var(--blue-500)'],['TikTok','15',30,'var(--purple-500)'],['LinkedIn','10',20,'var(--green-400)']]
-              .map(([name,pct,w,color]) => `
-                <div class="region-item">
-                  <div style="font:var(--t-label-lg);color:var(--text-primary);">${name}</div>
-                  <div><div class="region-bar-track"><div class="region-bar-fill" style="width:${w}%;background:${color}"></div></div></div>
-                  <div class="region-val">${pct}%</div>
-                </div>`).join('')}
+            ${byChannel.map(([name, pct, w, color]) => `
+              <div class="region-item">
+                <div style="font:var(--t-label-lg);color:var(--text-primary)">${name}</div>
+                <div><div class="region-bar-track"><div class="region-bar-fill" style="width:${w}%;background:${color}"></div></div></div>
+                <div class="region-val">${pct}%</div>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Key Ratios</span></div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            ${[['Click-Through Rate','5.0%','var(--cyan-400)'],['Click-to-Lead Rate','67.6%','var(--blue-500)'],['Lead Qualify Rate','62.0%','var(--purple-500)'],['FTD Conversion Rate','13.5%','var(--green-400)'],['Overall Impression→FTD','0.28%','var(--yellow-400)']].map(([lbl,val,color])=>`
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font:var(--t-body-sm);color:var(--text-secondary)">${lbl}</span>
+                <span style="font:700 15px/1 system-ui;color:${color}">${val}</span>
+              </div>`).join('')}
           </div>
         </div>
       </div>
     </div>`;
 }
 
-// ===== PAGE: REGIONAL PULSE =====
+// ===========================
+//  PAGE: REGIONAL PULSE
+// ===========================
 function renderRegional() {
+  const regions = [
+    { flag:'🇦🇪', name:'UAE',          leads:882,  roi:'415%', cvr:'11.4%', budget:'$14.2K', change:'↑ 8%',  dir:'up',   color:'var(--cyan-400)',   barW:88 },
+    { flag:'🇸🇦', name:'Saudi Arabia', leads:644,  roi:'352%', cvr:'9.8%',  budget:'$10.8K', change:'↑ 5%',  dir:'up',   color:'var(--blue-500)',   barW:72 },
+    { flag:'🇮🇷', name:'Iran',         leads:421,  roi:'278%', cvr:'7.2%',  budget:'$6.4K',  change:'↑ 14%', dir:'up',   color:'var(--green-400)', barW:56 },
+    { flag:'🇹🇷', name:'Turkey',       leads:574,  roi:'298%', cvr:'8.9%',  budget:'$9.0K',  change:'↑ 11%', dir:'up',   color:'var(--purple-500)',barW:65 },
+    { flag:'🇪🇬', name:'Egypt',        leads:312,  roi:'241%', cvr:'6.4%',  budget:'$5.2K',  change:'↓ 2%',  dir:'down', color:'var(--yellow-400)',barW:42 },
+    { flag:'🇰🇼', name:'Kuwait',       leads:198,  roi:'332%', cvr:'10.1%', budget:'$3.8K',  change:'↑ 7%',  dir:'up',   color:'var(--orange-400)',barW:30 },
+  ];
+
+  const topByROI = [...regions].sort((a,b) => parseInt(b.roi) - parseInt(a.roi));
+
   document.getElementById('main-content').innerHTML = `
     <div class="page-hd">
-      <div><h2>Regional Pulse</h2><p>Lead volume and performance by geography</p></div>
-      <button class="btn-primary">⬇ Export Regional</button>
+      <div><h2>Regional Pulse</h2><p>MENA lead volume and performance by market</p></div>
+      <button class="btn-primary" onclick="showToast('Regional report exported')">⬇ Export Regional</button>
     </div>
     <div class="grid-row cols-4">
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">🌍</div><div class="stat-value">24</div><div class="stat-label">Active markets</div><div class="stat-chip up">↑ 2 new this month</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">🌍</div><div class="stat-value">6</div><div class="stat-label">Active MENA markets</div><div class="stat-chip up">↑ 1 new this month</div></div>
       <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">🏆</div><div class="stat-value">UAE</div><div class="stat-label">Top market by leads</div><div class="stat-chip up">↑ 8%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">📈</div><div class="stat-value">SG</div><div class="stat-label">Fastest growing</div><div class="stat-chip up">↑ 12%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(248,113,113,.1);">⚠</div><div class="stat-value">DE</div><div class="stat-label">Needs attention</div><div class="stat-chip down">↓ 2%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">📈</div><div class="stat-value">Iran</div><div class="stat-label">Fastest growing</div><div class="stat-chip up">↑ 14%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(248,113,113,.1);">⚠</div><div class="stat-value">Egypt</div><div class="stat-label">Needs attention</div><div class="stat-chip down">↓ 2%</div></div>
     </div>
+
+    <div class="region-card-grid">
+      ${regions.map(r => `
+        <div class="region-card">
+          <div class="region-card-accent" style="background:${r.color}"></div>
+          <div class="region-card-top">
+            <div>
+              <div class="region-card-flag">${r.flag}</div>
+              <div class="region-card-country">${r.name}</div>
+            </div>
+            <span class="region-card-badge ${r.dir}">${r.change}</span>
+          </div>
+          <div class="region-card-stats">
+            <div><div class="rcs-val">${r.leads.toLocaleString()}</div><div class="rcs-lbl">Leads</div></div>
+            <div><div class="rcs-val" style="color:var(--green-400)">${r.roi}</div><div class="rcs-lbl">ROI</div></div>
+            <div><div class="rcs-val">${r.cvr}</div><div class="rcs-lbl">CVR</div></div>
+            <div><div class="rcs-val">${r.budget}</div><div class="rcs-lbl">Budget</div></div>
+          </div>
+          <div class="region-card-bar-track">
+            <div class="region-card-bar-fill" style="width:${r.barW}%;background:${r.color}"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+
     <div class="grid-row cols-2">
       <div class="card">
-        <div class="card-header"><span class="card-title">Top Regions — Lead Volume</span><div class="card-menu">⋯</div></div>
+        <div class="card-header"><span class="card-title">ROI Ranking</span><div class="card-menu">⋯</div></div>
         <div class="region-list">
-          ${[['🇦🇪','UAE',882,'↑8%','up',88,'var(--cyan-400)'],['🇸🇦','KSA',644,'↑5%','up',72,'var(--blue-500)'],['🇩🇪','Germany',487,'↓2%','down',55,'var(--purple-500)'],['🇸🇬','Singapore',374,'↑12%','up',42,'var(--green-400)'],['🇧🇷','Brazil',248,'↑3%','up',28,'var(--yellow-400)'],['🇬🇧','UK',212,'↓1%','down',22,'var(--orange-400)'],['🇮🇩','Indonesia',198,'↑7%','up',18,'var(--cyan-400)'],['🇵🇰','Pakistan',154,'↑4%','up',14,'var(--blue-400)']]
-            .map(([flag,name,val,chg,dir,w,color]) => `
-              <div class="region-item">
-                <div style="display:flex;align-items:center;gap:7px;"><span>${flag}</span><span class="region-name">${name} <span class="region-change ${dir}">${chg}</span></span></div>
-                <div><div class="region-bar-track"><div class="region-bar-fill" style="width:${w}%;background:${color}"></div></div></div>
-                <div class="region-val">${val}</div>
-              </div>`).join('')}
+          ${topByROI.map(r => `
+            <div class="region-item">
+              <div style="display:flex;align-items:center;gap:7px">
+                <span>${r.flag}</span>
+                <span class="region-name">${r.name}</span>
+              </div>
+              <div><div class="region-bar-track"><div class="region-bar-fill" style="width:${Math.round(parseInt(r.roi)/4.5)}%;background:${r.color}"></div></div></div>
+              <div class="region-val" style="color:var(--green-400);font-weight:700">${r.roi}</div>
+            </div>`).join('')}
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Regional ROI Comparison</span><div class="card-menu">⋯</div></div>
+        <div class="card-header"><span class="card-title">Lead Volume Share</span><div class="card-menu">⋯</div></div>
         <div class="region-list">
-          ${[['🇦🇪','UAE','415%',100],['🇸🇬','Singapore','398%',96],['🇸🇦','KSA','352%',85],['🇬🇧','UK','310%',75],['🇧🇷','Brazil','278%',67],['🇩🇪','Germany','241%',58],['🇮🇩','Indonesia','224%',54],['🇵🇰','Pakistan','189%',46]]
-            .map(([flag,name,roi,w]) => `
+          ${regions.map(r => {
+            const total = regions.reduce((s,x) => s + x.leads, 0);
+            const pct = Math.round(r.leads / total * 100);
+            return `
               <div class="region-item">
-                <div style="display:flex;align-items:center;gap:7px;"><span>${flag}</span><span class="region-name">${name}</span></div>
-                <div><div class="region-bar-track"><div class="region-bar-fill" style="width:${w}%;background:var(--cyan-400)"></div></div></div>
-                <div class="region-val" style="color:var(--green-400);font-weight:700;">${roi}</div>
-              </div>`).join('')}
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span>${r.flag}</span>
+                  <span class="region-name">${r.name} <span class="region-change ${r.dir}">${r.change}</span></span>
+                </div>
+                <div><div class="region-bar-track"><div class="region-bar-fill" style="width:${pct * 2.5}%;background:${r.color}"></div></div></div>
+                <div class="region-val">${r.leads.toLocaleString()}</div>
+              </div>`;
+          }).join('')}
         </div>
       </div>
     </div>`;
 }
 
-// ===== PAGE: SOCIAL RADAR =====
+// ===========================
+//  PAGE: SOCIAL RADAR
+// ===========================
 function renderSocial() {
-  const platforms = [
-    {icon:'📘',name:'Facebook',handle:'@OpoFinance',bg:'rgba(24,119,242,.12)',color:'#1877f2',followers:'284K',growth:'↑ 3.2%',dir:'up',eng:'4.8%',reach:'1.2M',posts:24},
-    {icon:'📸',name:'Instagram',handle:'@opofinance',bg:'rgba(225,48,108,.12)',color:'#e1306c',followers:'198K',growth:'↑ 5.7%',dir:'up',eng:'6.1%',reach:'890K',posts:31},
-    {icon:'🐦',name:'X / Twitter',handle:'@OpoFinance',bg:'rgba(29,161,242,.12)',color:'#1da1f2',followers:'142K',growth:'↑ 1.4%',dir:'up',eng:'2.9%',reach:'640K',posts:48},
-    {icon:'💼',name:'LinkedIn',handle:'OpoFinance',bg:'rgba(10,102,194,.12)',color:'#0a66c2',followers:'88K',growth:'↑ 8.3%',dir:'up',eng:'5.4%',reach:'420K',posts:12},
-    {icon:'🎵',name:'TikTok',handle:'@opofinance',bg:'rgba(105,201,208,.12)',color:'#69c9d0',followers:'312K',growth:'↑ 14.2%',dir:'up',eng:'8.7%',reach:'2.1M',posts:18},
-    {icon:'▶',name:'YouTube',handle:'OpoFinance',bg:'rgba(255,0,0,.1)',color:'#ff0000',followers:'54K',growth:'↓ 0.3%',dir:'down',eng:'3.2%',reach:'280K',posts:6},
-  ];
   document.getElementById('main-content').innerHTML = `
     <div class="page-hd">
-      <div><h2>Social Radar</h2><p>Cross-platform social performance overview</p></div>
-      <button class="btn-primary">📅 Schedule Post</button>
+      <div><h2>Social Radar</h2><p>Channel performance across Instagram, Google Ads, Email, and Affiliate</p></div>
+      <button class="btn-primary" onclick="showToast('Social report exported')">📊 Export Report</button>
     </div>
     <div class="grid-row cols-4">
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">📱</div><div class="stat-value">1.08M</div><div class="stat-label">Total followers</div><div class="stat-chip up">↑ 5.8%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">👁</div><div class="stat-value">5.6M</div><div class="stat-label">Monthly reach</div><div class="stat-chip up">↑ 11.2%</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">💬</div><div class="stat-value">4.7%</div><div class="stat-label">Avg. engagement</div><div class="stat-chip up">↑ 0.4pp</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">📤</div><div class="stat-value">139</div><div class="stat-label">Posts this month</div><div class="stat-chip up">↑ 14</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(225,48,108,.1);">📸</div><div class="stat-value">198K</div><div class="stat-label">Instagram followers</div><div class="stat-chip up">↑ 5.7%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(66,133,244,.1);">🔍</div><div class="stat-value">84.2K</div><div class="stat-label">Google Ads impressions</div><div class="stat-chip up">↑ 12.4%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(251,191,36,.1);">📧</div><div class="stat-value">28.4%</div><div class="stat-label">Email open rate</div><div class="stat-chip up">↑ 2.1pp</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">🤝</div><div class="stat-value">124</div><div class="stat-label">Active affiliates</div><div class="stat-chip up">↑ 8 new</div></div>
     </div>
-    <div class="platform-grid">
-      ${platforms.map(p => `
-        <div class="platform-card">
-          <div class="platform-hd">
-            <div class="platform-logo" style="background:${p.bg};color:${p.color};">${p.icon}</div>
-            <div><div class="platform-name">${p.name}</div><div class="platform-handle">${p.handle}</div></div>
+
+    <div class="channel-grid">
+
+      <!-- Instagram -->
+      <div class="channel-card">
+        <div class="channel-hd">
+          <div class="channel-logo" style="background:rgba(225,48,108,.12);color:#e1306c">📸</div>
+          <div>
+            <div class="channel-name">Instagram</div>
+            <div class="channel-sub">@opofinance · Organic + Paid</div>
           </div>
-          <div class="platform-metric"><div class="platform-val">${p.followers}</div><div class="platform-lbl">Followers</div></div>
-          <div class="platform-chip ${p.dir}">${p.growth}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;">
-            <div><div style="font:700 14px/1 system-ui;color:var(--text-primary)">${p.eng}</div><div style="font:var(--t-label-sm);color:var(--text-muted);margin-top:2px">Eng. Rate</div></div>
-            <div><div style="font:700 14px/1 system-ui;color:var(--text-primary)">${p.reach}</div><div style="font:var(--t-label-sm);color:var(--text-muted);margin-top:2px">Reach</div></div>
-            <div><div style="font:700 14px/1 system-ui;color:var(--text-primary)">${p.posts}</div><div style="font:var(--t-label-sm);color:var(--text-muted);margin-top:2px">Posts</div></div>
+          <span class="channel-chip up" style="margin-left:auto">↑ 5.7%</span>
+        </div>
+        <div class="channel-kpi-grid">
+          <div><div class="ck-val">198K</div><div class="ck-lbl">Followers</div></div>
+          <div><div class="ck-val">6.1%</div><div class="ck-lbl">Eng. Rate</div></div>
+          <div><div class="ck-val">890K</div><div class="ck-lbl">Monthly Reach</div></div>
+          <div><div class="ck-val">31</div><div class="ck-lbl">Posts This Month</div></div>
+        </div>
+        <div class="mini-bar-wrap" style="margin-top:14px">
+          <div style="font:var(--t-label-sm);color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Content Performance</div>
+          ${[['Reels','82%',82,'#e1306c'],['Carousels','64%',64,'#f56040'],['Stories','51%',51,'#fbad50'],['Static','34%',34,'#94a3b8']].map(([l,v,w,c])=>`
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">${l}</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${w}%;background:${c}"></div></div>
+            <span class="mini-bar-val">${v}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Google Ads -->
+      <div class="channel-card">
+        <div class="channel-hd">
+          <div class="channel-logo" style="background:rgba(66,133,244,.12);color:#4285f4">🔍</div>
+          <div>
+            <div class="channel-name">Google Ads</div>
+            <div class="channel-sub">Search + Display campaigns</div>
           </div>
+          <span class="channel-chip up" style="margin-left:auto">↑ 8.7%</span>
+        </div>
+        <div class="channel-kpi-grid">
+          <div><div class="ck-val">84.2K</div><div class="ck-lbl">Impressions</div></div>
+          <div><div class="ck-val">4,210</div><div class="ck-lbl">Clicks</div></div>
+          <div><div class="ck-val">5.0%</div><div class="ck-lbl">CTR</div></div>
+          <div><div class="ck-val">$2.40</div><div class="ck-lbl">Avg. CPC</div></div>
+        </div>
+        <div class="mini-bar-wrap" style="margin-top:14px">
+          <div style="font:var(--t-label-sm);color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Campaign Breakdown</div>
+          ${[['Search','72%',72,'#4285f4'],['Display','18%',18,'#34a853'],['YouTube','7%',7,'#ea4335'],['Shopping','3%',3,'#fbbc04']].map(([l,v,w,c])=>`
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">${l}</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${w}%;background:${c}"></div></div>
+            <span class="mini-bar-val">${v}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="channel-card">
+        <div class="channel-hd">
+          <div class="channel-logo" style="background:rgba(251,191,36,.12);color:#fbbf24">📧</div>
+          <div>
+            <div class="channel-name">Email Marketing</div>
+            <div class="channel-sub">42,800 active subscribers</div>
+          </div>
+          <span class="channel-chip up" style="margin-left:auto">↑ 2.1pp</span>
+        </div>
+        <div class="channel-kpi-grid">
+          <div><div class="ck-val">42.8K</div><div class="ck-lbl">Subscribers</div></div>
+          <div><div class="ck-val">28.4%</div><div class="ck-lbl">Open Rate</div></div>
+          <div><div class="ck-val">4.2%</div><div class="ck-lbl">Click Rate</div></div>
+          <div><div class="ck-val">8</div><div class="ck-lbl">Campaigns Sent</div></div>
+        </div>
+        <div class="mini-bar-wrap" style="margin-top:14px">
+          <div style="font:var(--t-label-sm);color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Sequence Performance</div>
+          ${[['Welcome','58%',58,'#fbbf24'],['Nurture','42%',42,'#f59e0b'],['Re-engage','31%',31,'#d97706'],['Promo','24%',24,'#94a3b8']].map(([l,v,w,c])=>`
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">${l}</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${w}%;background:${c}"></div></div>
+            <span class="mini-bar-val">${v}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Affiliate -->
+      <div class="channel-card">
+        <div class="channel-hd">
+          <div class="channel-logo" style="background:rgba(139,92,246,.12);color:#8b5cf6">🤝</div>
+          <div>
+            <div class="channel-name">Affiliate Network</div>
+            <div class="channel-sub">IB partners & referrals</div>
+          </div>
+          <span class="channel-chip up" style="margin-left:auto">↑ 9.3%</span>
+        </div>
+        <div class="channel-kpi-grid">
+          <div><div class="ck-val">124</div><div class="ck-lbl">Active Partners</div></div>
+          <div><div class="ck-val">1,240</div><div class="ck-lbl">Referred Leads</div></div>
+          <div><div class="ck-val">$18.50</div><div class="ck-lbl">Avg. CPA</div></div>
+          <div><div class="ck-val">$22.9K</div><div class="ck-lbl">Commission Paid</div></div>
+        </div>
+        <div class="mini-bar-wrap" style="margin-top:14px">
+          <div style="font:var(--t-label-sm);color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Partner Tier Breakdown</div>
+          ${[['Platinum','44%',44,'#8b5cf6'],['Gold','31%',31,'#fbbf24'],['Silver','18%',18,'#94a3b8'],['Bronze','7%',7,'#fb923c']].map(([l,v,w,c])=>`
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">${l}</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${w}%;background:${c}"></div></div>
+            <span class="mini-bar-val">${v}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+    </div>`;
+}
+
+// ===========================
+//  PAGE: REPORTS
+// ===========================
+function renderReports() {
+  const today     = new Date().toISOString().split('T')[0];
+  const thirtyAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+
+  const templates = [
+    ['📈','Campaign Performance','Weekly/monthly ROI & lead summary'],
+    ['🌍','Regional Breakdown','Leads & conversions by geography'],
+    ['📡','Social Analytics','Cross-platform engagement report'],
+    ['💰','Budget Utilisation','Spend vs. forecast analysis'],
+    ['🎯','Funnel Analysis','Stage-by-stage drop-off report'],
+    ['📋','Compliance Audit','Regulatory & data privacy report'],
+    ['🤝','IB Partner Report','Introducing broker activity'],
+    ['⚡','Custom Builder','Build your own report'],
+  ];
+
+  const recent = [
+    ['📈','Weekly Campaign Summary — W14',  'Campaign Performance',  'Apr 10, 2026','PDF','2.4 MB'],
+    ['🌍','MENA Regional Q1 2026 Review',   'Regional Breakdown',    'Apr 1, 2026', 'XLSX','1.8 MB'],
+    ['📡','Social Radar — March 2026',       'Social Analytics',      'Apr 1, 2026', 'PDF','1.2 MB'],
+    ['💰','Q1 Budget Utilisation Report',    'Budget Utilisation',    'Apr 1, 2026', 'XLSX','980 KB'],
+    ['🎯','Lead Funnel Deep Dive — Mar',     'Funnel Analysis',       'Mar 31, 2026','PDF','3.1 MB'],
+    ['📋','Compliance Audit Q1 2026',        'Compliance Audit',      'Mar 31, 2026','PDF','5.6 MB'],
+  ];
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-hd">
+      <div><h2>Reports</h2><p>Download, schedule, and build custom performance reports</p></div>
+      <button class="btn-primary" onclick="showToast('Custom report queued for generation')">＋ New Report</button>
+    </div>
+
+    <!-- Controls Bar with Date Range -->
+    <div class="reports-controls">
+      <div class="date-range-wrap">
+        <span class="date-range-label">Date Range:</span>
+        <input type="date" class="date-input" id="rpt-from" value="${thirtyAgo}">
+        <span class="date-sep">→</span>
+        <input type="date" class="date-input" id="rpt-to"   value="${today}">
+      </div>
+      <select class="table-filter"><option>All Report Types</option><option>Campaign</option><option>Regional</option><option>Social</option><option>Compliance</option></select>
+      <select class="table-filter"><option>All Formats</option><option>PDF</option><option>XLSX</option><option>CSV</option></select>
+      <button class="btn-primary" onclick="exportReports()">⬇ Export Selected</button>
+      <button class="btn-secondary" onclick="scheduleReport()">🕐 Schedule</button>
+    </div>
+
+    <!-- Templates -->
+    <div style="margin-bottom:8px;font:var(--t-label-md);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Report Templates</div>
+    <div class="template-grid">
+      ${templates.map(([icon, name, desc]) => `
+        <div class="template-card" onclick="showToast('Generating: ${name}…')">
+          <div class="template-icon">${icon}</div>
+          <div class="template-name">${name}</div>
+          <div class="template-desc">${desc}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Recent Reports</div>
+        <span style="font:var(--t-label-sm);color:var(--text-muted)">${recent.length} reports</span>
+      </div>
+      ${recent.map(([icon, name, type, date, fmt, size]) => `
+        <div class="report-row">
+          <div class="report-icon" style="background:rgba(0,212,232,.08)">${icon}</div>
+          <div class="report-info">
+            <div class="report-name">${name}</div>
+            <div class="report-meta">${type} · Generated ${date} · ${fmt} · ${size}</div>
+          </div>
+          <span style="font:var(--t-label-sm);color:var(--text-muted);flex-shrink:0;margin-right:4px">${fmt}</span>
+          <button class="report-dl" onclick="showToast('Downloading: ${name}')">⬇ Download</button>
         </div>`).join('')}
     </div>`;
 }
 
-// ===== PAGE: REPORTS =====
-function renderReports() {
-  document.getElementById('main-content').innerHTML = `
-    <div class="page-hd">
-      <div><h2>Reports</h2><p>Download, schedule, and build custom performance reports</p></div>
-      <button class="btn-primary">＋ New Report</button>
-    </div>
-    <div style="margin-bottom:8px;font:var(--t-label-md);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;">Report Templates</div>
-    <div class="template-grid">
-      ${[['📈','Campaign Performance','Weekly/monthly ROI & lead summary'],['🌍','Regional Breakdown','Leads & conversions by geography'],['📡','Social Analytics','Cross-platform engagement report'],['💰','Budget Utilisation','Spend vs. forecast analysis'],['🎯','Funnel Analysis','Stage-by-stage drop-off report'],['📋','Compliance Audit','Regulatory & data privacy report'],['🤝','IB Partner Report','Introducing broker activity'],['⚡','Custom Builder','Build your own report']]
-        .map(([icon,name,desc]) => `
-          <div class="template-card">
-            <div class="template-icon">${icon}</div>
-            <div class="template-name">${name}</div>
-            <div class="template-desc">${desc}</div>
-          </div>`).join('')}
-    </div>
-    <div class="table-wrap">
-      <div class="table-header">
-        <div class="table-title">Recent Reports</div>
-        <select class="table-filter"><option>All Types</option><option>Campaign</option><option>Regional</option><option>Social</option><option>Compliance</option></select>
-      </div>
-      ${[['📈','Weekly Campaign Summary — W14','Campaign Performance · Generated Apr 10, 2026','PDF, 2.4 MB'],['🌍','Regional Q1 2026 Review','Regional Breakdown · Generated Apr 1, 2026','XLSX, 1.8 MB'],['📡','Social Radar — March 2026','Social Analytics · Generated Apr 1, 2026','PDF, 1.2 MB'],['💰','Q1 Budget Utilisation Report','Budget Utilisation · Generated Apr 1, 2026','XLSX, 980 KB'],['🎯','Lead Funnel Deep Dive — Mar','Funnel Analysis · Generated Mar 31, 2026','PDF, 3.1 MB'],['📋','Compliance Audit Q1 2026','Compliance Audit · Generated Mar 31, 2026','PDF, 5.6 MB']]
-        .map(([icon,name,meta,size]) => `
-          <div class="report-row">
-            <div class="report-icon" style="background:rgba(0,212,232,.08);">${icon}</div>
-            <div class="report-info"><div class="report-name">${name}</div><div class="report-meta">${meta}</div></div>
-            <div style="font:var(--t-label-sm);color:var(--text-muted);margin-right:8px;">${size}</div>
-            <button class="report-dl">⬇ Download</button>
-          </div>`).join('')}
-    </div>`;
+function exportReports() {
+  const from = document.getElementById('rpt-from').value;
+  const to   = document.getElementById('rpt-to').value;
+  showToast(`Exporting reports: ${from} → ${to}`);
+}
+function scheduleReport() {
+  showToast('Report schedule saved — you\'ll receive it every Monday at 8:00 AM');
 }
 
-// ===== PAGE: SETTINGS =====
+// ===========================
+//  PAGE: SETTINGS
+// ===========================
 function renderSettings() {
   document.getElementById('main-content').innerHTML = `
     <div class="page-hd"><div><h2>Settings</h2><p>Manage your account, notifications, and integrations</p></div></div>
@@ -361,7 +586,7 @@ function renderSettings() {
             <div><label style="font:var(--t-label-md);color:var(--text-secondary);display:block;margin-bottom:6px;">Last name</label><input type="text" placeholder="—" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:9px 12px;font:var(--t-body-md);color:var(--text-primary);width:100%;outline:none;"></div>
           </div>
           <div style="margin-bottom:16px;"><label style="font:var(--t-label-md);color:var(--text-secondary);display:block;margin-bottom:6px;">Email</label><input type="email" value="aytirik@opofinance.com" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:9px 12px;font:var(--t-body-md);color:var(--text-primary);width:100%;outline:none;"></div>
-          <button class="btn-primary" style="font-size:13px;padding:9px 18px;">Save Changes</button>
+          <button class="btn-primary" style="font-size:13px;padding:9px 18px;" onclick="showToast('Profile saved successfully')">Save Changes</button>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Notifications</span></div>
@@ -388,16 +613,18 @@ function renderSettings() {
         <div class="card">
           <div class="card-header"><span class="card-title">Security</span></div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <button class="btn-secondary" style="justify-content:flex-start;font-size:13px;">🔑 Change password</button>
-            <button class="btn-secondary" style="justify-content:flex-start;font-size:13px;">📱 Enable 2FA</button>
-            <button class="btn-secondary" style="justify-content:flex-start;font-size:13px;">🔑 Manage API keys</button>
+            <button class="btn-secondary" style="justify-content:flex-start;font-size:13px;" onclick="showToast('Password change email sent')">🔑 Change password</button>
+            <button class="btn-secondary" style="justify-content:flex-start;font-size:13px;" onclick="showToast('2FA setup initiated')">📱 Enable 2FA</button>
+            <button class="btn-secondary" style="justify-content:flex-start;font-size:13px;" onclick="showToast('API key management opened')">🔑 Manage API keys</button>
           </div>
         </div>
       </div>
     </div>`;
 }
 
-// ===== THEME =====
+// ===========================
+//  THEME TOGGLE
+// ===========================
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
@@ -405,16 +632,18 @@ function toggleTheme() {
   document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
 }
 
-// ===== BAR CHART =====
+// ===========================
+//  BAR CHART  (Overview)
+// ===========================
 function buildBarChart() {
   const data = [
-    { day: 'Mon', a: 320, b: 210, c: 38 },
-    { day: 'Tue', a: 480, b: 310, c: 52 },
-    { day: 'Wed', a: 390, b: 240, c: 44 },
-    { day: 'Thu', a: 560, b: 380, c: 68 },
-    { day: 'Fri', a: 720, b: 460, c: 88 },
-    { day: 'Sat', a: 410, b: 270, c: 46 },
-    { day: 'Sun', a: 290, b: 190, c: 32 },
+    { day:'Mon', a:320, b:210, c:38 },
+    { day:'Tue', a:480, b:310, c:52 },
+    { day:'Wed', a:390, b:240, c:44 },
+    { day:'Thu', a:560, b:380, c:68 },
+    { day:'Fri', a:720, b:460, c:88 },
+    { day:'Sat', a:410, b:270, c:46 },
+    { day:'Sun', a:290, b:190, c:32 },
   ];
   const maxVal = Math.max(...data.map(d => d.a));
   const chartH = 120;
@@ -430,7 +659,7 @@ function buildBarChart() {
       const b = document.createElement('div');
       b.className = 'bar-seg ' + cls;
       b.style.height = Math.round((val / maxVal) * chartH) + 'px';
-      b.addEventListener('mouseenter', (e) => showTip(e, `${d.day}: ${val}`));
+      b.addEventListener('mouseenter', e => showTip(e, `${d.day}: ${val.toLocaleString()}`));
       b.addEventListener('mouseleave', hideTip);
       return b;
     };
@@ -446,7 +675,9 @@ function buildBarChart() {
   });
 }
 
-// ===== TOOLTIP =====
+// ===========================
+//  TOOLTIP
+// ===========================
 const tip = document.getElementById('tooltip');
 function showTip(e, text) {
   if (!tip) return;
@@ -457,7 +688,25 @@ function showTip(e, text) {
 function moveTip(e) {
   if (!tip) return;
   tip.style.left = (e.clientX + 12) + 'px';
-  tip.style.top = (e.clientY - 8) + 'px';
+  tip.style.top  = (e.clientY - 8) + 'px';
 }
 function hideTip() { if (tip) tip.classList.remove('visible'); }
-document.addEventListener('mousemove', (e) => { if (tip && tip.classList.contains('visible')) moveTip(e); });
+document.addEventListener('mousemove', e => { if (tip && tip.classList.contains('visible')) moveTip(e); });
+
+// ===========================
+//  TOAST NOTIFICATION
+// ===========================
+let toastTimer;
+function showToast(msg) {
+  let t = document.getElementById('export-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'export-toast';
+    t.className = 'export-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
