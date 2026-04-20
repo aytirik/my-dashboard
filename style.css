@@ -977,6 +977,74 @@ body {
 .export-toast.show { transform:translateY(0); opacity:1; }
 
 /* =====================================================
+   AUTH MESSAGES  (login / signup forms)
+   ===================================================== */
+.auth-message {
+  padding:10px 14px; border-radius:var(--r-sm);
+  font:var(--t-label-md); margin-top:2px;
+}
+.auth-message.error   { background:rgba(248,113,113,.12); color:var(--red-400);   border:1px solid rgba(248,113,113,.25); }
+.auth-message.success { background:rgba(52,211,153,.12);  color:var(--green-400); border:1px solid rgba(52,211,153,.25); }
+
+/* =====================================================
+   CAMPAIGN MODAL
+   ===================================================== */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.65); z-index:2000;
+  align-items:center; justify-content:center;
+  backdrop-filter:blur(3px);
+}
+.modal-overlay.visible { display:flex; }
+
+.modal-card {
+  background:var(--card-bg); border:1px solid var(--border);
+  border-radius:var(--r-lg); width:100%; max-width:520px;
+  box-shadow:var(--elev-3); margin:16px;
+  animation:modal-in .2s ease;
+}
+@keyframes modal-in { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
+
+.modal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 24px 0;
+}
+.modal-heading { font:var(--t-h3); color:var(--text-primary); }
+.modal-close {
+  width:32px; height:32px; border-radius:var(--r-xs);
+  border:1px solid var(--border); background:var(--input-bg);
+  color:var(--text-muted); font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.modal-close:hover { border-color:var(--red-400); color:var(--red-400); }
+
+.modal-body   { padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+.modal-footer { padding:0 24px 20px; display:flex; justify-content:flex-end; gap:10px; }
+
+.modal-row   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:480px) { .modal-row { grid-template-columns:1fr; } }
+
+.modal-field { display:flex; flex-direction:column; gap:6px; }
+.modal-field label {
+  font:var(--t-label-lg); color:var(--text-secondary);
+}
+.modal-field .req { color:var(--red-400); }
+.modal-field input,
+.modal-field select {
+  background:var(--input-bg); border:1.5px solid var(--border);
+  border-radius:var(--r-sm); padding:10px 13px;
+  font:var(--t-body-md); color:var(--text-primary); outline:none;
+}
+.modal-field input:focus,
+.modal-field select:focus { border-color:var(--cyan-400); box-shadow:0 0 0 3px rgba(0,212,232,.1); }
+.modal-field input::placeholder { color:var(--text-muted); }
+.modal-field select option { background:var(--card-bg); }
+
+/* Danger table button */
+.tbl-btn-danger { color:var(--red-400) !important; border-color:rgba(248,113,113,.3) !important; }
+.tbl-btn-danger:hover { border-color:var(--red-400) !important; background:rgba(248,113,113,.08) !important; }
+
+/* =====================================================
    SOCIAL RADAR — Channel Cards
    ===================================================== */
 .channel-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:20px; }

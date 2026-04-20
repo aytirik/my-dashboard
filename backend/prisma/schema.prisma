@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["dashboard_user"]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+
+  @@schema("dashboard_user")
+}
+
+model Campaign {
+  id        Int      @id @default(autoincrement())
+  title     String
+  channel   String
+  budget    Float
+  status    String   @default("draft")
+  startDate DateTime @map("start_date")
+  createdAt DateTime @default(now())
+
+  @@schema("dashboard_user")
+}

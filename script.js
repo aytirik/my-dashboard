@@ -29,15 +29,63 @@ function closeSidebar() {
 }
 
 // ===== AUTH =====
-function doLogin() {
-  const btn = event && event.currentTarget;
-  if (btn) { btn.textContent = 'Signing in…'; btn.disabled = true; }
-  setTimeout(() => { window.location.href = 'dashboard.html'; }, 350);
+async function doLogin() {
+  const email    = (document.getElementById('login-email')    || {}).value?.trim();
+  const password = (document.getElementById('login-password') || {}).value;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+  if (btn)   { btn.textContent = 'Signing in…'; btn.disabled = true; }
+
+  try {
+    const res  = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (errEl) { errEl.textContent = data.error || 'Login failed'; errEl.style.display = 'block'; }
+      if (btn)   { btn.textContent = 'Sign In to Dashboard'; btn.disabled = false; }
+      return;
+    }
+    sessionStorage.setItem('user', JSON.stringify(data));
+    window.location.href = 'dashboard.html';
+  } catch {
+    if (errEl) { errEl.textContent = 'Cannot reach server. Is the backend running?'; errEl.style.display = 'block'; }
+    if (btn)   { btn.textContent = 'Sign In to Dashboard'; btn.disabled = false; }
+  }
 }
-function doSignup() {
-  const btn = event && event.currentTarget;
-  if (btn) { btn.textContent = 'Creating account…'; btn.disabled = true; }
-  setTimeout(() => { window.location.href = 'dashboard.html'; }, 350);
+
+async function doSignup() {
+  const name     = (document.getElementById('signup-name')     || {}).value?.trim();
+  const email    = (document.getElementById('signup-email')    || {}).value?.trim();
+  const password = (document.getElementById('signup-password') || {}).value;
+  const msgEl    = document.getElementById('signup-message');
+  const btn      = document.getElementById('signup-btn');
+
+  if (msgEl) { msgEl.style.display = 'none'; msgEl.className = 'auth-message'; }
+  if (btn)   { btn.textContent = 'Creating account…'; btn.disabled = true; }
+
+  try {
+    const res  = await fetch('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (msgEl) { msgEl.textContent = data.error || 'Registration failed'; msgEl.className = 'auth-message error'; msgEl.style.display = 'block'; }
+      if (btn)   { btn.textContent = 'Create Account'; btn.disabled = false; }
+      return;
+    }
+    if (msgEl) { msgEl.textContent = 'Account created! Redirecting to sign in…'; msgEl.className = 'auth-message success'; msgEl.style.display = 'block'; }
+    setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+  } catch {
+    if (msgEl) { msgEl.textContent = 'Cannot reach server. Is the backend running?'; msgEl.className = 'auth-message error'; msgEl.style.display = 'block'; }
+    if (btn)   { btn.textContent = 'Create Account'; btn.disabled = false; }
+  }
 }
 
 // ===== ROUTER =====
@@ -96,78 +144,220 @@ function renderOverview() {
 }
 
 // ===========================
-//  PAGE: CAMPAIGNS
+//  PAGE: CAMPAIGNS  (live API)
 // ===========================
-function renderCampaigns() {
-  const campaigns = [
-    { name:'MENA FX Awareness',    dates:'Apr 1 – Apr 30',  channel:'Meta Ads',     status:'live',   leads:1240, budgetUsed:12400, budgetTotal:18000, roi:'340%', ctr:'5.2%', cvr:'9.2%' },
-    { name:'EU Retail Trader',     dates:'Mar 15 – Apr 15', channel:'Google Search',status:'live',   leads:892,  budgetUsed:9800,  budgetTotal:15000, roi:'285%', ctr:'4.8%', cvr:'7.8%' },
-    { name:'GCC VIP Traders',      dates:'Apr 8 – Apr 28',  channel:'LinkedIn',     status:'live',   leads:318,  budgetUsed:6200,  budgetTotal:12000, roi:'415%', ctr:'3.1%', cvr:'11.4%'},
-    { name:'SEA Crypto Crossover', dates:'Apr 5 – Apr 25',  channel:'TikTok',       status:'paused', leads:461,  budgetUsed:4200,  budgetTotal:8000,  roi:'198%', ctr:'6.7%', cvr:'5.4%' },
-    { name:'LATAM Onboarding',     dates:'Starts Apr 14',   channel:'Email Drip',   status:'draft',  leads:null, budgetUsed:0,     budgetTotal:3500,  roi:'—',    ctr:'—',    cvr:'—'    },
-    { name:'Q1 Brand Awareness',   dates:'Jan 1 – Mar 31',  channel:'Display',      status:'ended',  leads:3140, budgetUsed:22000, budgetTotal:22000, roi:'220%', ctr:'2.3%', cvr:'6.1%' },
-    { name:'TR Forex Push',        dates:'Mar 20 – Apr 20', channel:'Google Search',status:'live',   leads:574,  budgetUsed:5800,  budgetTotal:9000,  roi:'298%', ctr:'5.5%', cvr:'8.9%' },
-    { name:'AE Premium Clients',   dates:'Apr 10 – May 10', channel:'LinkedIn',     status:'live',   leads:209,  budgetUsed:3100,  budgetTotal:10000, roi:'380%', ctr:'2.9%', cvr:'12.1%'},
-  ];
+const API = 'http://localhost:3000/api';
 
-  const statusConfig = {
-    live:   { label:'Live',   cls:'status-live' },
-    paused: { label:'Paused', cls:'status-paused' },
-    draft:  { label:'Draft',  cls:'status-draft' },
-    ended:  { label:'Ended',  cls:'status-ended' },
-  };
-  const roiColor = r => r === '—' ? '' : parseInt(r) >= 300 ? 'color:var(--green-400);font-weight:700' : parseInt(r) >= 200 ? 'color:var(--yellow-400);font-weight:700' : '';
-  const actionLabel = s => ({ live:'Edit', paused:'Resume', draft:'Launch', ended:'Report' }[s]);
+const STATUS_MAP = {
+  active: { label: 'Active', cls: 'status-live'   },
+  draft:  { label: 'Draft',  cls: 'status-draft'  },
+  paused: { label: 'Paused', cls: 'status-paused' },
+  ended:  { label: 'Ended',  cls: 'status-ended'  },
+};
 
-  const totals = { live: campaigns.filter(c=>c.status==='live').length, budget: '$67.7K', roi: '312%', leads: campaigns.reduce((a,c)=>(c.leads||0)+a,0) };
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function fmtBudget(n) {
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
 
-  document.getElementById('main-content').innerHTML = `
+async function renderCampaigns() {
+  const content = document.getElementById('main-content');
+  content.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-muted);font:var(--t-body-md)">Loading campaigns…</div>`;
+
+  let campaigns = [];
+  try {
+    const res = await fetch(`${API}/campaigns`);
+    const json = await res.json();
+    campaigns = json.data || [];
+  } catch {
+    content.innerHTML = `<div style="padding:60px;text-align:center;color:var(--red-400)">Failed to load campaigns. Is the backend running?</div>`;
+    return;
+  }
+
+  const totalBudget = campaigns.reduce((s, c) => s + (c.budget || 0), 0);
+  const activeCount = campaigns.filter(c => c.status === 'active').length;
+
+  content.innerHTML = `
     <div class="page-hd">
-      <div><h2>Campaigns</h2><p>Manage and monitor all active marketing campaigns</p></div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-secondary" onclick="showToast('CSV exported successfully')">⬇ Export</button>
-        <button class="btn-primary">＋ New Campaign</button>
-      </div>
+      <div><h2>Campaigns</h2><p>Manage and monitor all marketing campaigns</p></div>
+      <button class="btn-primary" onclick="openCampaignModal()">＋ Add New Campaign</button>
     </div>
     <div class="grid-row cols-4">
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1);">📣</div><div class="stat-value">${campaigns.length}</div><div class="stat-label">Total campaigns</div><div class="stat-chip up">↑ 3 this month</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1);">✅</div><div class="stat-value">${totals.live}</div><div class="stat-label">Currently live</div><div class="stat-chip up">↑ 1 vs last week</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1);">💰</div><div class="stat-value">${totals.budget}</div><div class="stat-label">Total active budget</div><div class="stat-chip down">↓ $4.2K paused</div></div>
-      <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,.1);">📈</div><div class="stat-value">${totals.roi}</div><div class="stat-label">Avg. blended ROI</div><div class="stat-chip up">↑ 18.4%</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,232,.1)">📣</div><div class="stat-value">${campaigns.length}</div><div class="stat-label">Total campaigns</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(52,211,153,.1)">✅</div><div class="stat-value">${activeCount}</div><div class="stat-label">Currently active</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.1)">💰</div><div class="stat-value">${fmtBudget(totalBudget)}</div><div class="stat-label">Total budget</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:rgba(248,113,113,.1)">📋</div><div class="stat-value">${campaigns.filter(c => c.status === 'draft').length}</div><div class="stat-label">Drafts</div></div>
     </div>
     <div class="table-wrap">
       <div class="table-header">
         <div class="table-title">All Campaigns</div>
-        <select class="table-filter"><option>All Channels</option><option>Meta Ads</option><option>Google Search</option><option>TikTok</option><option>Email Drip</option><option>LinkedIn</option><option>Display</option></select>
-        <select class="table-filter"><option>All Statuses</option><option>Live</option><option>Paused</option><option>Draft</option><option>Ended</option></select>
       </div>
-      <table class="data-table">
-        <thead><tr>
-          <th>Campaign</th><th>Channel</th><th>Status</th>
-          <th>Leads</th><th>Budget Used</th><th>ROI</th><th>CTR</th><th>CVR</th><th>Action</th>
-        </tr></thead>
-        <tbody>
-          ${campaigns.map(c => {
-            const sc = statusConfig[c.status];
-            const pct = c.budgetTotal > 0 ? Math.round(c.budgetUsed / c.budgetTotal * 100) : 0;
-            return `<tr>
-              <td><strong>${c.name}</strong><br><span style="font-size:11px;color:var(--text-muted)">${c.dates}</span></td>
-              <td style="color:var(--text-secondary)">${c.channel}</td>
-              <td><span class="status-pill ${sc.cls}"><span class="status-dot"></span>${sc.label}</span></td>
-              <td>${c.leads !== null ? c.leads.toLocaleString() : '—'}</td>
-              <td>
-                <div style="font-size:12px">$${c.budgetUsed.toLocaleString()} / $${c.budgetTotal.toLocaleString()}</div>
-                <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${pct}%"></div></div>
-              </td>
-              <td style="${roiColor(c.roi)}">${c.roi}</td>
-              <td>${c.ctr}</td>
-              <td>${c.cvr}</td>
-              <td><button class="tbl-btn">${actionLabel(c.status)}</button></td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
+      ${campaigns.length === 0
+        ? `<div style="padding:48px;text-align:center;color:var(--text-muted)">No campaigns yet. Click <strong>Add New Campaign</strong> to create one.</div>`
+        : `<table class="data-table">
+            <thead><tr>
+              <th>Title</th><th>Channel</th><th>Budget</th><th>Status</th><th>Start Date</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${campaigns.map(c => {
+                const sc = STATUS_MAP[c.status] || { label: c.status, cls: 'status-draft' };
+                return `<tr>
+                  <td><strong>${c.title}</strong></td>
+                  <td style="color:var(--text-secondary)">${c.channel}</td>
+                  <td>${fmtBudget(c.budget)}</td>
+                  <td><span class="status-pill ${sc.cls}"><span class="status-dot"></span>${sc.label}</span></td>
+                  <td style="color:var(--text-secondary)">${fmtDate(c.startDate)}</td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <button class="tbl-btn" onclick="openCampaignModal(${JSON.stringify(c).replace(/"/g, '&quot;')})">Edit</button>
+                      <button class="tbl-btn tbl-btn-danger" onclick="deleteCampaign(${c.id},'${c.title.replace(/'/g, "\\'")}')">Delete</button>
+                    </div>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>`
+      }
     </div>`;
+
+  ensureCampaignModal();
+}
+
+// ---- Campaign Modal ----
+function ensureCampaignModal() {
+  if (document.getElementById('campaign-modal')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'campaign-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div id="modal-title" class="modal-heading">New Campaign</div>
+        <button class="modal-close" onclick="closeCampaignModal()" aria-label="Close">✕</button>
+      </div>
+      <div id="modal-error" class="auth-message error" style="display:none;margin-bottom:16px"></div>
+      <div class="modal-body">
+        <input type="hidden" id="modal-id">
+        <div class="modal-field">
+          <label>Title <span class="req">*</span></label>
+          <input id="modal-title-input" type="text" placeholder="e.g. MENA FX Awareness">
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>Channel <span class="req">*</span></label>
+            <input id="modal-channel" type="text" placeholder="e.g. Google Ads">
+          </div>
+          <div class="modal-field">
+            <label>Budget ($) <span class="req">*</span></label>
+            <input id="modal-budget" type="number" min="0" placeholder="e.g. 5000">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>Status <span class="req">*</span></label>
+            <select id="modal-status">
+              <option value="draft">Draft</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="ended">Ended</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>Start Date <span class="req">*</span></label>
+            <input id="modal-start-date" type="date">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeCampaignModal()">Cancel</button>
+        <button id="modal-save-btn" class="btn-primary" onclick="saveCampaign()">Save Campaign</button>
+      </div>
+    </div>`;
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeCampaignModal(); });
+  document.body.appendChild(overlay);
+}
+
+function openCampaignModal(campaign) {
+  ensureCampaignModal();
+  const isEdit = !!campaign;
+  document.getElementById('modal-title').textContent   = isEdit ? 'Edit Campaign' : 'New Campaign';
+  document.getElementById('modal-save-btn').textContent = isEdit ? 'Save Changes' : 'Save Campaign';
+  document.getElementById('modal-id').value            = isEdit ? campaign.id : '';
+  document.getElementById('modal-title-input').value   = isEdit ? campaign.title : '';
+  document.getElementById('modal-channel').value       = isEdit ? campaign.channel : '';
+  document.getElementById('modal-budget').value        = isEdit ? campaign.budget : '';
+  document.getElementById('modal-status').value        = isEdit ? campaign.status : 'draft';
+  document.getElementById('modal-start-date').value    = isEdit && campaign.startDate ? campaign.startDate.split('T')[0] : '';
+  const errEl = document.getElementById('modal-error');
+  errEl.style.display = 'none'; errEl.textContent = '';
+  document.getElementById('campaign-modal').classList.add('visible');
+}
+
+function closeCampaignModal() {
+  const m = document.getElementById('campaign-modal');
+  if (m) m.classList.remove('visible');
+}
+
+async function saveCampaign() {
+  const id         = document.getElementById('modal-id').value;
+  const title      = document.getElementById('modal-title-input').value.trim();
+  const channel    = document.getElementById('modal-channel').value.trim();
+  const budget     = document.getElementById('modal-budget').value;
+  const status     = document.getElementById('modal-status').value;
+  const start_date = document.getElementById('modal-start-date').value;
+  const errEl      = document.getElementById('modal-error');
+  const saveBtn    = document.getElementById('modal-save-btn');
+
+  errEl.style.display = 'none';
+  if (!title || !channel || budget === '' || !status || !start_date) {
+    errEl.textContent = 'All fields are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  saveBtn.textContent = 'Saving…'; saveBtn.disabled = true;
+
+  try {
+    const isEdit = !!id;
+    const url    = isEdit ? `${API}/campaigns/${id}` : `${API}/campaigns`;
+    const res    = await fetch(url, {
+      method: isEdit ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, channel, budget: Number(budget), status, start_date }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      errEl.textContent = json.message || 'Save failed.';
+      errEl.style.display = 'block';
+      saveBtn.textContent = isEdit ? 'Save Changes' : 'Save Campaign'; saveBtn.disabled = false;
+      return;
+    }
+    closeCampaignModal();
+    showToast(isEdit ? 'Campaign updated' : 'Campaign created');
+    renderCampaigns();
+  } catch {
+    errEl.textContent = 'Cannot reach server.';
+    errEl.style.display = 'block';
+    saveBtn.textContent = id ? 'Save Changes' : 'Save Campaign'; saveBtn.disabled = false;
+  }
+}
+
+async function deleteCampaign(id, title) {
+  if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+  try {
+    const res  = await fetch(`${API}/campaigns/${id}`, { method: 'DELETE' });
+    const json = await res.json();
+    if (!res.ok) { showToast(json.message || 'Delete failed'); return; }
+    showToast('Campaign deleted');
+    renderCampaigns();
+  } catch {
+    showToast('Cannot reach server');
+  }
 }
 
 // ===========================

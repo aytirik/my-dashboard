@@ -44,14 +44,14 @@
       </div>
       <div class="form-group">
         <label>Email address</label>
-        <input type="email" placeholder="aytirik@opofinance.com" value="aytirik@opofinance.com">
+        <input id="login-email" type="email" placeholder="you@opofinance.com">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" placeholder="••••••••" value="password123">
-        <div class="form-hint">Any credentials will work for this demo</div>
+        <input id="login-password" type="password" placeholder="••••••••">
       </div>
-      <button class="btn-login" onclick="doLogin()">Sign In to Dashboard</button>
+      <div id="login-error" class="auth-message error" style="display:none"></div>
+      <button id="login-btn" class="btn-login" onclick="doLogin()">Sign In to Dashboard</button>
       <div class="divider">or continue with</div>
       <div class="social-btns">
         <button class="btn-social" onclick="doLogin()">
